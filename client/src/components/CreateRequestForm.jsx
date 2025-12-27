@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createRequest } from '../store/requestSlice';
+import { createRequest, getTeamRequests } from '../store/requestSlice';
 import { getAllEquipment } from '../store/equipmentSlice';
 
 const CreateRequestForm = ({ onClose }) => {
@@ -37,6 +37,8 @@ const CreateRequestForm = ({ onClose }) => {
     e.preventDefault();
     if (formData.equipmentId && formData.title && formData.type) {
       dispatch(createRequest(formData)).then(() => {
+        // Refetch team requests to show the newly created request
+        dispatch(getTeamRequests());
         onClose();
       });
     }
