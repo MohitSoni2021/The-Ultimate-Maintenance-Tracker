@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  GENERAL
+  TECHNICIAN
+  MANAGER
+  ADMIN
+}
+
+enum RequestType {
+  CORRECTIVE
+  PREVENTIVE
+}
+
+enum Stage {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  REPAIRED
+  SCRAP
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  name      String
+  avatar    String?
+  role      Role       @default(GENERAL)
+  teamId    String?
+  team      MaintenanceTeam? @relation("TeamMembers", fields: [teamId], references: [id], onDelete: SetNull)
+  
+  assignedRequests MaintenanceRequest[] @relation("AssignedTo")
+  createdRequests  MaintenanceRequest[] @relation("CreatedBy")
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model MaintenanceTeam {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  members   User[]     @relation("TeamMembers")
+  requests  MaintenanceRequest[]
+  equipment Equipment[]
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Equipment {
+  id          String     @id @default(cuid())
+  name        String
+  serialNo    String     @unique
+  location    String
+  department  String
+  category    String
+  isActive    Boolean    @default(true)
+  
+  teamId      String
+  team        MaintenanceTeam @relation(fields: [teamId], references: [id])
+  
+  requests    MaintenanceRequest[]
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model MaintenanceRequest {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  type        RequestType
+  stage       Stage      @default(OPEN)
+  priority    String     @default("MEDIUM")
+  
+  createdById String
+  createdBy   User       @relation("CreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  
+  assignedToId String?
+  assignedTo  User?      @relation("AssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+  
+  equipmentId String
+  equipment   Equipment  @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  teamId      String
+  team        MaintenanceTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  
+  scheduledDate DateTime?
+  completedDate DateTime?
+  duration      Float?
+  
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
