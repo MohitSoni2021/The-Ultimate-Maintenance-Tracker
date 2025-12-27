@@ -4,7 +4,7 @@ import prisma from '../utils/prisma.js';
 
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, name, role, teamId, avatar } = req.body;
+    const { email, password, name, role, teamId, avatar, departmentId } = req.body;
 
     if (!email || !password || !name) {
       res.status(400).json({ error: 'Email, password, and name are required' });
@@ -35,6 +35,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         role: role || 'GENERAL',
         teamId: teamId || null,
         avatar: avatar || null,
+        departmentId: departmentId || null,
       },
       select: {
         id: true,
@@ -43,7 +44,9 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         avatar: true,
         role: true,
         teamId: true,
+        departmentId: true,
         team: true,
+        department: true,
       },
     });
 
@@ -64,7 +67,9 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
         avatar: true,
         role: true,
         teamId: true,
+        departmentId: true,
         team: true,
+        department: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -96,7 +101,9 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
         avatar: true,
         role: true,
         teamId: true,
+        departmentId: true,
         team: true,
+        department: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -123,13 +130,14 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
       return;
     }
 
-    const { name, avatar, role, teamId } = req.body;
+    const { name, avatar, role, teamId, departmentId } = req.body;
 
     const updateData: Record<string, any> = {};
     if (name !== undefined) updateData.name = name;
     if (avatar !== undefined) updateData.avatar = avatar;
     if (role !== undefined) updateData.role = role;
     if (teamId !== undefined) updateData.teamId = teamId;
+    if (departmentId !== undefined) updateData.departmentId = departmentId;
 
     const user = await prisma.user.update({
       where: { id },
@@ -141,7 +149,9 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
         avatar: true,
         role: true,
         teamId: true,
+        departmentId: true,
         team: true,
+        department: true,
       },
     });
 
@@ -190,7 +200,9 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
         avatar: true,
         role: true,
         teamId: true,
+        departmentId: true,
         team: true,
+        department: true,
       },
     });
 
