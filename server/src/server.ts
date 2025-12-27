@@ -10,6 +10,7 @@ import teamRoutes from './routes/teamRoutes.js';
 import departmentRoutes from './routes/departmentRoutes.js';
 import equipmentRoutes from './routes/equipmentRoutes.js';
 import requestRoutes from './routes/requestRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/api/teams', teamRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/equipment', equipmentRoutes);
 app.use('/api/requests', requestRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ error: 'Route not found' });

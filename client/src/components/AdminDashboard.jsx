@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import api from '../api/axios';
+import { toast } from 'react-hot-toast';
 import AdminUsersManagement from './AdminUsersManagement';
 import AdminTeamsManagement from './AdminTeamsManagement';
 import AdminDepartmentsManagement from './AdminDepartmentsManagement';
@@ -77,19 +79,61 @@ const AdminDashboard = () => {
 };
 
 const AdminOverview = () => {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/admin/stats');
+      setStats(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch dashboard stats');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-4 gap-6">
-        <StatCard label="Total Users" value="--" color="bg-blue-50" textColor="text-blue-600" />
-        <StatCard label="Teams" value="--" color="bg-purple-50" textColor="text-purple-600" />
-        <StatCard label="Equipment" value="--" color="bg-green-50" textColor="text-green-600" />
-        <StatCard label="Requests" value="--" color="bg-orange-50" textColor="text-orange-600" />
+        <StatCard label="Total Users" value={stats?.totalUsers ?? '--'} color="bg-blue-50" textColor="text-blue-600" />
+        <StatCard label="Teams" value={stats?.totalTeams ?? '--'} color="bg-purple-50" textColor="text-purple-600" />
+        <StatCard label="Equipment" value={stats?.totalEquipment ?? '--'} color="bg-green-50" textColor="text-green-600" />
+        <StatCard label="Requests" value={stats?.totalRequests ?? '--'} color="bg-orange-50" textColor="text-orange-600" />
+      </div>
+
+      <div className="grid grid-cols-4 gap-6">
+        <StatCard label="Active Equipment" value={stats?.activeEquipment ?? '--'} color="bg-emerald-50" textColor="text-emerald-600" />
+        <StatCard label="Pending Requests" value={stats?.pendingRequests ?? '--'} color="bg-red-50" textColor="text-red-600" />
+        <StatCard label="Completed" value={stats?.requestsByStage?.find(s => s.stage === 'COMPLETED')?._count || 0} color="bg-cyan-50" textColor="text-cyan-600" />
+        <StatCard label="In Progress" value={stats?.requestsByStage?.find(s => s.stage === 'IN_PROGRESS')?._count || 0} color="bg-yellow-50" textColor="text-yellow-600" />
       </div>
 
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
-          <p className="text-gray-600 text-sm">Activity logs coming soon</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Request Status Breakdown</h3>
+          <div className="space-y-3">
+            {stats?.requestsByStage?.map((item) => (
+              <div key={item.stage} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{item.stage}</span>
+                <span className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded">{item.count}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
