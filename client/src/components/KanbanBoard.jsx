@@ -59,7 +59,7 @@ const KanbanColumn = ({ stage, requests, onCardClick }) => {
   );
 };
 
-const KanbanBoard = ({ requests, teamMembers = [] }) => {
+const KanbanBoard = ({ requests, teamMembers = [], unassignedRequests = [] }) => {
   const dispatch = useDispatch();
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [activeId, setActiveId] = useState(null);
@@ -121,6 +121,17 @@ const KanbanBoard = ({ requests, teamMembers = [] }) => {
         onDragEnd={handleDragEnd}
       >
         <div className="flex gap-4 overflow-x-auto pb-4">
+          {/* Unassigned Requests Column */}
+          {unassignedRequests && unassignedRequests.length > 0 && (
+            <KanbanColumn
+              stage={{ value: 'UNASSIGNED', label: 'Available', color: 'bg-purple-50', borderColor: 'border-purple-200' }}
+              requests={unassignedRequests}
+              onCardClick={setSelectedRequest}
+              dragOverId={activeId}
+            />
+          )}
+          
+          {/* Regular Stages */}
           {STAGES.map((stage) => (
             <KanbanColumn
               key={stage.value}
