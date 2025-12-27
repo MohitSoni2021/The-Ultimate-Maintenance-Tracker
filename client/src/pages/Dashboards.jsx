@@ -15,7 +15,6 @@ import KanbanBoard from '../components/KanbanBoard';
 import ManagerAnalytics from '../components/ManagerAnalytics';
 import { getTeamRequests, getAllRequests } from '../store/requestSlice';
 import { useDispatch } from 'react-redux';
-import { useEffect } from 'react';
 import AdminTeamsManagement from '../components/AdminTeamsManagement';
 import AdminEquipmentManagement from '../components/AdminEquipmentManagement';
 
