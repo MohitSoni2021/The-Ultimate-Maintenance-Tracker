@@ -222,6 +222,27 @@ const RequestModal = ({ request, teamMembers = [], onClose }) => {
               >
                 Assign to Me
               </button>
+              {user?.role === 'ADMIN' && assignedToId && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await dispatch(updateRequest({ 
+                        id: request.id, 
+                        data: { assignedToId: null } 
+                      })).unwrap();
+                      toast.success('Request unassigned successfully');
+                      onClose();
+                    } catch (error) {
+                      toast.error(error?.error || 'Failed to unassign request');
+                    }
+                  }}
+                  className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition whitespace-nowrap"
+                  title="Remove assignment from user"
+                >
+                  Unassign
+                </button>
+              )}
             </div>
           </div>
 
