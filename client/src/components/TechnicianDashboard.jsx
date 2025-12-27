@@ -7,6 +7,7 @@ import UserProfile from './UserProfile';
 import Sidebar from './Sidebar';
 import { AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import api from '../api/axios';
 
 // eslint-disable-next-line no-unused-vars
 const StatCard = ({ icon: IconComponent, label, value, color }) => (
@@ -34,16 +35,30 @@ const TechnicianDashboard = () => {
     });
   }, [dispatch]);
 
+  // Fetch team members from the team API endpoint
   useEffect(() => {
-    if (requests && requests.length > 0) {
-      const members = requests
-        .filter((r) => r.assignedTo)
-        .map((r) => r.assignedTo)
-        .filter((member, index, self) => self.findIndex((m) => m.id === member.id) === index);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setTeamMembers(members);
-    }
-  }, [requests]);
+    const fetchTeamMembers = async () => {
+      if (user?.teamId) {
+        try {
+          const response = await api.get(`/teams/${user.teamId}`);
+          console.log('Team members response:', response.data);
+          setTeamMembers(response.data.members || []);
+        } catch (error) {
+          console.error('Failed to fetch team members:', error);
+          // Fallback to getting members from requests if API fails
+          if (requests && requests.length > 0) {
+            const members = requests
+              .filter((r) => r.assignedTo)
+              .map((r) => r.assignedTo)
+              .filter((member, index, self) => self.findIndex((m) => m.id === member.id) === index);
+            setTeamMembers(members);
+          }
+        }
+      }
+    };
+    
+    fetchTeamMembers();
+  }, [user?.teamId, requests]);
 
   const openRequests = requests.filter((r) => ['OPEN', 'ASSIGNED'].includes(r.stage));
   const inProgressRequests = requests.filter((r) => r.stage === 'IN_PROGRESS');
@@ -51,6 +66,11 @@ const TechnicianDashboard = () => {
     if (!r.scheduledDate || ['COMPLETED', 'CANCELLED'].includes(r.stage)) return false;
     return new Date(r.scheduledDate) < new Date();
   });
+
+  // Filter requests for technician: show unassigned tasks and tasks assigned to this user only
+  const technicianRequests = requests.filter((r) => 
+    !r.assignedToId || r.assignedToId === user?.id
+  );
 
   if (loading && requests.length === 0) {
     return (
@@ -104,7 +124,7 @@ const TechnicianDashboard = () => {
                   <p className="text-gray-600">No maintenance requests assigned to your team yet.</p>
                 </div>
               ) : (
-                <KanbanBoard requests={requests} teamMembers={teamMembers} />
+                <KanbanBoard requests={technicianRequests} teamMembers={teamMembers} />
               )}
             </div>
           </div>
