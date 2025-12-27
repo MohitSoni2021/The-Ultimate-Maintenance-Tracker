@@ -206,7 +206,7 @@ export const updateRequest = async (req: Request, res: Response) => {
       where: { id },
       include: {
         equipment: {
-          select: { department: true },
+          select: { category: true },
         },
       },
     });
@@ -250,9 +250,9 @@ export const updateRequest = async (req: Request, res: Response) => {
           return res.status(400).json({ error: 'User is not part of this team' });
         }
 
-        // Ensure the assigned user is in the same department as the equipment
-        if (assignedUser.department?.name !== request.equipment?.department) {
-          return res.status(400).json({ error: 'User is not in the same department as the equipment' });
+        // Ensure the assigned user is in the same department as the equipment category
+        if (assignedUser.department?.name !== request.equipment?.category) {
+          return res.status(400).json({ error: 'User department does not match equipment category' });
         }
       }
       updateData.assignedToId = assignedToId;

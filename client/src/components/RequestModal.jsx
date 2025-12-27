@@ -33,43 +33,46 @@ const RequestModal = ({ request, teamMembers = [], onClose }) => {
   useEffect(() => {
     const fetchAndFilterMembers = async () => {
       try {
-        // First, get the team members from the request's team
+        let teamMembers = [];
+        
+        // First, try to get members from request.team.members
         if (request?.team?.members && request.team.members.length > 0) {
-          let filteredMembers = request.team.members;
-
-          // Then filter by equipment department
-          if (request?.equipment?.department) {
-            filteredMembers = filteredMembers.filter(
-              (member) => member.department?.name === request.equipment.department
-            );
-            console.log(
-              `Filtered team members for department "${request.equipment.department}":`,
-              filteredMembers
-            );
+          teamMembers = request.team.members;
+          console.log('Using team members from request:', teamMembers);
+        } 
+        // If not available, fetch from API using team ID
+        else if (request?.team?.id) {
+          try {
+            const response = await api.get(`/teams/${request.team.id}`);
+            teamMembers = response.data.members || [];
+            console.log('Fetched team members from API:', teamMembers);
+          } catch (error) {
+            console.error('Failed to fetch team members:', error);
+            teamMembers = [];
           }
-          setMembers(filteredMembers);
-        } else if (request?.team?.id) {
-          // Fallback: fetch team members if not included in request
-          const response = await api.get(`/teams/${request.team.id}`);
-          let filteredMembers = response.data.members || [];
-
-          if (request?.equipment?.department) {
-            filteredMembers = filteredMembers.filter(
-              (member) => member.department?.name === request.equipment.department
-            );
-          }
-          setMembers(filteredMembers);
-        } else {
-          setMembers([]);
         }
+
+        console.log('All team members:', teamMembers);
+        console.log('Equipment category:', request?.equipment?.category);
+
+        // Filter by equipment category - ONLY show members matching category
+        let filteredMembers = [];
+        if (request?.equipment?.category && teamMembers.length > 0) {
+          filteredMembers = teamMembers.filter(
+            (member) => member.department?.name === request.equipment.category
+          );
+          console.log(`Filtered members for category "${request.equipment.category}":`, filteredMembers);
+        }
+
+        setMembers(filteredMembers);
       } catch (error) {
-        console.error('Failed to fetch team members:', error);
-        setMembers(teamMembers || []);
+        console.error('Error in fetchAndFilterMembers:', error);
+        setMembers([]);
       }
     };
     
     fetchAndFilterMembers();
-  }, [request?.team?.id, request?.equipment?.department, teamMembers]);
+  }, [request?.team?.id, request?.equipment?.category, request?.id]);
 
   useEffect(() => {
     setFormData({
