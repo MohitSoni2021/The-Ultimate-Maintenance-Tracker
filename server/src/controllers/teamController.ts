@@ -31,7 +31,7 @@ export const getTeamById = async (req: Request, res: Response): Promise<void> =>
       where: { id },
       include: {
         members: {
-          select: { id: true, name: true, email: true },
+          select: { id: true, name: true, email: true, department: true },
         },
       },
     });

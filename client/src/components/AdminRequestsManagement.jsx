@@ -2,15 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter } from 'lucide-react';
 import api from '../api/axios';
 import { toast } from 'react-hot-toast';
+import RequestModal from './RequestModal';
 
 const AdminRequestsManagement = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [stageFilter, setStageFilter] = useState('');
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
 
   useEffect(() => {
     fetchAllRequests();
+    fetchTeamMembers();
   }, []);
 
   const fetchAllRequests = async () => {
@@ -24,6 +28,32 @@ const AdminRequestsManagement = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchTeamMembers = async () => {
+    try {
+      // Get the user's current team first
+      const userResponse = await api.get('/users/me');
+      console.log('User response:', userResponse.data);
+      if (userResponse.data?.teamId) {
+        const teamResponse = await api.get(`/teams/${userResponse.data.teamId}`);
+        console.log('Team response:', teamResponse.data);
+        setTeamMembers(teamResponse.data.members || []);
+      } else {
+        console.log('No team ID found in user data');
+      }
+    } catch (error) {
+      console.error('Failed to fetch team members:', error);
+    }
+  };
+
+  const handleRequestSelect = (request) => {
+    setSelectedRequest(request);
+  };
+
+  const handleRequestClose = () => {
+    setSelectedRequest(null);
+    fetchAllRequests(); // Refresh requests after closing modal
   };
 
   const filteredRequests = requests.filter((request) => {
@@ -118,7 +148,11 @@ const AdminRequestsManagement = () => {
                 </tr>
               ) : (
                 filteredRequests.map((request) => (
-                  <tr key={request.id} className="hover:bg-gray-50 transition-all">
+                  <tr 
+                    key={request.id} 
+                    onClick={() => handleRequestSelect(request)}
+                    className="hover:bg-indigo-50 transition-all cursor-pointer"
+                  >
                     <td className="px-6 py-4">
                       <span className="font-medium text-gray-900">{request.title}</span>
                     </td>
@@ -151,6 +185,14 @@ const AdminRequestsManagement = () => {
           </table>
         </div>
       </div>
+
+      {selectedRequest && (
+        <RequestModal
+          request={selectedRequest}
+          teamMembers={teamMembers}
+          onClose={handleRequestClose}
+        />
+      )}
     </div>
   );
 };
