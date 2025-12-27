@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import AdminUsersManagement from './AdminUsersManagement';
 import AdminTeamsManagement from './AdminTeamsManagement';
+import AdminDepartmentsManagement from './AdminDepartmentsManagement';
 import AdminEquipmentManagement from './AdminEquipmentManagement';
 import AdminRequestsManagement from './AdminRequestsManagement';
 import AdminKanban from './AdminKanban';
@@ -16,6 +17,7 @@ const AdminDashboard = () => {
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'users', label: 'Users' },
     { id: 'teams', label: 'Teams' },
+    { id: 'departments', label: 'Departments' },
     { id: 'equipment', label: 'Equipment' },
     { id: 'requests', label: 'Requests' },
     { id: 'kanban', label: 'Kanban' },
@@ -30,6 +32,8 @@ const AdminDashboard = () => {
         return <AdminUsersManagement />;
       case 'teams':
         return <AdminTeamsManagement />;
+      case 'departments':
+        return <AdminDepartmentsManagement />;
       case 'equipment':
         return <AdminEquipmentManagement />;
       case 'requests':

@@ -28,6 +28,7 @@ const Sidebar = ({ activeTab, onTabChange }) => {
     ADMIN: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid },
       { id: 'users', label: 'Users', icon: Users },
+      { id: 'departments', label: 'Departments', icon: Wrench },
       { id: 'teams', label: 'Teams', icon: Wrench },
       { id: 'equipment', label: 'Equipment', icon: Wrench },
       { id: 'requests', label: 'Requests', icon: ClipboardList },
