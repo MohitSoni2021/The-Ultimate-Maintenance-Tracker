@@ -84,9 +84,9 @@ const TechnicianDashboard = () => {
     return false;
   });
 
-  // Filter for unassigned requests only (available for self-assignment)
+  // Filter for unassigned requests only (show all unassigned requests in the system)
   const unassignedRequests = requests.filter((r) => {
-    return !r.assignedToId && r.equipment?.category === user?.department?.name;
+    return !r.assignedToId;
   });
 
   if (loading && requests.length === 0) {
@@ -129,59 +129,6 @@ const TechnicianDashboard = () => {
               </div>
             </div>
 
-            {/* New Unassigned Requests Section */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Available for You</h2>
-              {unassignedRequests.length === 0 ? (
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-                  <CheckCircle size={48} className="mx-auto text-green-600 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No new requests</h3>
-                  <p className="text-gray-600">All available requests have been assigned.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {unassignedRequests.map((request) => (
-                    <div
-                      key={request.id}
-                      onClick={() => setSelectedRequest(request)}
-                      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md hover:border-indigo-300 cursor-pointer transition"
-                    >
-                      <div className="space-y-3">
-                        <div>
-                          <h4 className="font-semibold text-gray-900 line-clamp-2">{request.title}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{request.equipment?.name}</p>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className={`text-xs font-medium px-2 py-1 rounded ${
-                            request.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
-                            request.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-green-100 text-green-700'
-                          }`}>
-                            {request.priority}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {request.type === 'PREVENTIVE' ? '🛠️ Preventive' : '⚠️ Corrective'}
-                          </span>
-                        </div>
-                        {request.description && (
-                          <p className="text-sm text-gray-600 line-clamp-2">{request.description}</p>
-                        )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedRequest(request);
-                          }}
-                          className="w-full mt-2 px-3 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition"
-                        >
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Maintenance Requests</h2>
@@ -194,7 +141,7 @@ const TechnicianDashboard = () => {
                   <p className="text-gray-600">No maintenance requests assigned to your team yet.</p>
                 </div>
               ) : (
-                <KanbanBoard requests={technicianRequests} teamMembers={teamMembers} />
+                <KanbanBoard requests={technicianRequests} teamMembers={teamMembers} unassignedRequests={unassignedRequests} />
               )}
             </div>
           </div>
