@@ -231,7 +231,6 @@ export const ManagerDashboard = () => {
             {/* Stats Overview */}
             {!statsLoading && stats && (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <StatCard label="Total Requests" value={stats.total ?? '--'} color="bg-indigo-50" textColor="text-indigo-600" />
                 {stats.byStage?.map((s) => (
                   <StatCard key={s.name} label={s.name} value={s.count ?? '--'} color="bg-gray-50" textColor="text-gray-700" />
                 ))}
