@@ -146,26 +146,42 @@ const GeneralDashboard = () => {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="px-8 h-16 flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {activeTab === 'dashboard' && 'Dashboard'}
-              {activeTab === 'requests' && 'My Requests'}
-              {activeTab === 'equipment' && 'Equipment Search'}
-              {activeTab === 'calendar' && 'Calendar'}
-              {activeTab === 'profile' && 'Profile'}
-            </h1>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm text-sm"
-              >
-                + New Request
-              </button>
-              <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
-              <span className="text-gray-700 font-medium hidden sm:block">Welcome, {user?.name}</span>
-              <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
-                {user?.name?.charAt(0).toUpperCase()}
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+          <div className="px-8 h-20 flex items-center justify-between gap-4">
+            {/* Left: Title */}
+            <div className="flex-1">
+              <h1 className="text-xl font-semibold text-gray-900 truncate">
+                {activeTab === 'dashboard' && 'Dashboard'}
+                {activeTab === 'requests' && 'My Requests'}
+                {activeTab === 'equipment' && 'Equipment Search'}
+                {activeTab === 'calendar' && 'Calendar'}
+                {activeTab === 'profile' && 'Profile'}
+              </h1>
+            </div>
+
+            {/* Right: Actions and User Info */}
+            <div className="flex items-center gap-6">
+              {activeTab !== 'profile' && (
+                <button
+                  onClick={() => setShowCreateForm(true)}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition text-sm whitespace-nowrap shadow-sm"
+                >
+                  + New Request
+                </button>
+              )}
+              
+              {/* Divider */}
+              <div className="h-6 w-px bg-gray-300"></div>
+              
+              {/* User Profile */}
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-medium text-gray-900">{user?.name}</span>
+                  <span className="text-xs text-gray-500 uppercase font-semibold">{user?.role}</span>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </div>
               </div>
             </div>
           </div>
@@ -306,21 +322,38 @@ export const ManagerDashboard = () => {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm border-b border-gray-200">
-          <div className="px-8 h-16 flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900 capitalize">
-              {activeTab === 'dashboard' ? 'Overview' : activeTab === 'my-requests' ? 'My Requests' : activeTab}
-            </h1>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm text-sm"
-              >
-                + Create Request
-              </button>
-              <span className="text-gray-700 font-medium hidden sm:block">Welcome, {user?.name}</span>
-              <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
-                {user?.name?.charAt(0).toUpperCase()}
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+          <div className="px-8 h-20 flex items-center justify-between gap-4">
+            {/* Left: Title */}
+            <div className="flex-1">
+              <h1 className="text-xl font-semibold text-gray-900 capitalize truncate">
+                {activeTab === 'dashboard' ? 'Overview' : activeTab === 'my-requests' ? 'My Requests' : activeTab}
+              </h1>
+            </div>
+
+            {/* Right: Actions and User Info */}
+            <div className="flex items-center gap-6">
+              {(activeTab === 'dashboard' || activeTab === 'my-requests') && (
+                <button
+                  onClick={() => setShowCreateForm(true)}
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition text-sm whitespace-nowrap shadow-sm"
+                >
+                  + Create Request
+                </button>
+              )}
+              
+              {/* Divider */}
+              <div className="h-6 w-px bg-gray-300"></div>
+              
+              {/* User Profile */}
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-medium text-gray-900">{user?.name}</span>
+                  <span className="text-xs text-gray-500 uppercase font-semibold">{user?.role}</span>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </div>
               </div>
             </div>
           </div>
