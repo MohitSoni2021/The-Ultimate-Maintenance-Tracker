@@ -34,59 +34,69 @@ const ManagerAnalytics = () => {
     );
   }
 
-  if (!stats) return null;
+  if (!stats || ((!stats.byTeam || stats.byTeam.length === 0) && (!stats.byCategory || stats.byCategory.length === 0))) {
+    return (
+      <div className="bg-white rounded-lg shadow p-8 text-center">
+        <p className="text-gray-500">No data available yet. Requests will appear here once they are created.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <StatCard label="Total Requests" value={stats.total} color="text-indigo-600" bgColor="bg-indigo-50" />
-        {stats.byStage.map((s) => (
-          <StatCard key={s.name} label={s.name} value={s.count} color="text-gray-700" bgColor="bg-gray-50" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard label="Total Requests" value={stats?.total ?? 0} color="text-indigo-600" bgColor="bg-indigo-50" />
+        {stats?.byStage?.map((s) => (
+          <StatCard key={s.name} label={s.name} value={s.count ?? 0} color="text-gray-700" bgColor="bg-gray-50" />
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Requests by Team */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">Requests per Team</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.byTeam}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+        {stats?.byTeam && stats.byTeam.length > 0 && (
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Requests per Team</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.byTeam}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Requests by Category */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">Equipment Categories</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={stats.byCategory}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="count"
-                >
-                  {stats.byCategory.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+        {stats?.byCategory && stats.byCategory.length > 0 && (
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-900 mb-6">Equipment Categories</h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={stats.byCategory}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="count"
+                  >
+                    {stats.byCategory.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
