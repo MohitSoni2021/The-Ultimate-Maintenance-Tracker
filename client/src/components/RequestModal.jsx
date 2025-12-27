@@ -4,6 +4,7 @@ import { updateRequest } from '../store/requestSlice';
 import { X, Info } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import EquipmentDetailsModal from './EquipmentDetailsModal';
+import api from '../api/axios';
 
 const STAGES = [
   { value: 'OPEN', label: 'New' },
@@ -13,7 +14,7 @@ const STAGES = [
   { value: 'SCRAP', label: 'Scrap' },
 ];
 
-const RequestModal = ({ request, teamMembers, onClose }) => {
+const RequestModal = ({ request, teamMembers = [], onClose }) => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState(() => ({
     stage: request?.stage || 'OPEN',
@@ -24,7 +25,51 @@ const RequestModal = ({ request, teamMembers, onClose }) => {
     priority: request?.priority || 'MEDIUM',
   }));
   const [showEquipmentDetails, setShowEquipmentDetails] = useState(false);
+  const [members, setMembers] = useState(teamMembers);
   const { loading } = useSelector((state) => state.requests);
+  const { user } = useSelector((state) => state.auth);
+
+  // Fetch team members if not provided
+  useEffect(() => {
+    const fetchAndFilterMembers = async () => {
+      try {
+        // First, get the team members from the request's team
+        if (request?.team?.members && request.team.members.length > 0) {
+          let filteredMembers = request.team.members;
+
+          // Then filter by equipment department
+          if (request?.equipment?.department) {
+            filteredMembers = filteredMembers.filter(
+              (member) => member.department?.name === request.equipment.department
+            );
+            console.log(
+              `Filtered team members for department "${request.equipment.department}":`,
+              filteredMembers
+            );
+          }
+          setMembers(filteredMembers);
+        } else if (request?.team?.id) {
+          // Fallback: fetch team members if not included in request
+          const response = await api.get(`/teams/${request.team.id}`);
+          let filteredMembers = response.data.members || [];
+
+          if (request?.equipment?.department) {
+            filteredMembers = filteredMembers.filter(
+              (member) => member.department?.name === request.equipment.department
+            );
+          }
+          setMembers(filteredMembers);
+        } else {
+          setMembers([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch team members:', error);
+        setMembers(teamMembers || []);
+      }
+    };
+    
+    fetchAndFilterMembers();
+  }, [request?.team?.id, request?.equipment?.department, teamMembers]);
 
   useEffect(() => {
     setFormData({
@@ -68,9 +113,8 @@ const RequestModal = ({ request, teamMembers, onClose }) => {
   };
 
   const handleAssignToMe = () => {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.id) {
-      setAssignedToId(currentUser.id);
+    if (user?.id) {
+      setFormData(prev => ({ ...prev, assignedToId: user.id }));
     }
   };
 
@@ -158,11 +202,15 @@ const RequestModal = ({ request, teamMembers, onClose }) => {
                 className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
               >
                 <option value="">Unassigned</option>
-                {teamMembers?.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
-                  </option>
-                ))}
+                {members && members.length > 0 ? (
+                  members.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.name}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No team members available</option>
+                )}
               </select>
               <button
                 type="button"

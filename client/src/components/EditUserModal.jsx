@@ -9,12 +9,15 @@ const EditUserModal = ({ user, onClose, onUserUpdated }) => {
     avatar: user.avatar || '',
     role: user.role,
     teamId: user.teamId || '',
+    departmentId: user.departmentId || '',
   });
   const [teams, setTeams] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchTeams();
+    fetchDepartments();
   }, []);
 
   const fetchTeams = async () => {
@@ -23,6 +26,15 @@ const EditUserModal = ({ user, onClose, onUserUpdated }) => {
       setTeams(response.data);
     } catch (error) {
       console.error('Failed to fetch teams', error);
+    }
+  };
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await api.get('/departments');
+      setDepartments(response.data);
+    } catch (error) {
+      console.error('Failed to fetch departments', error);
     }
   };
 
@@ -37,11 +49,8 @@ const EditUserModal = ({ user, onClose, onUserUpdated }) => {
 
     try {
       const payload = { ...formData };
-      if (formData.role !== 'TECHNICIAN') {
-        delete payload.teamId;
-      }
 
-      await api.patch(`/users/${user.id}`, payload);
+      await api.put(`/users/${user.id}`, payload);
       toast.success('User updated successfully');
       onUserUpdated();
     } catch (error) {
@@ -103,25 +112,39 @@ const EditUserModal = ({ user, onClose, onUserUpdated }) => {
             </select>
           </div>
 
-          {formData.role === 'TECHNICIAN' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-1">Team</label>
-              <select
-                name="teamId"
-                value={formData.teamId}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
-              >
-                <option value="">Select Team</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">Team (Optional)</label>
+            <select
+              name="teamId"
+              value={formData.teamId}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            >
+              <option value="">Select Team</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-1">Department</label>
+            <select
+              name="departmentId"
+              value={formData.departmentId}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            >
+              <option value="">Select Department</option>
+              {departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-1">Avatar URL</label>

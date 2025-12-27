@@ -85,6 +85,7 @@ const AdminUsersManagement = () => {
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Email</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Role</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Team</th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Department</th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Created</th>
                 <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">Actions</th>
               </tr>
@@ -92,7 +93,7 @@ const AdminUsersManagement = () => {
             <tbody className="divide-y divide-gray-200">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-8 text-center text-gray-600">
+                  <td colSpan="7" className="px-6 py-8 text-center text-gray-600">
                     No users found
                   </td>
                 </tr>
@@ -119,6 +120,7 @@ const AdminUsersManagement = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{user.team?.name || '-'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{user.department?.name || '-'}</td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>

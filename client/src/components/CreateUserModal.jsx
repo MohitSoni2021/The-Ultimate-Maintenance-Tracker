@@ -9,9 +9,11 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
     password: '',
     role: 'GENERAL',
     teamId: '',
+    departmentId: '',
     avatar: '',
   });
   const [teams, setTeams] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,11 +26,21 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
     }
   }, []);
 
+  const fetchDepartments = useCallback(async () => {
+    try {
+      const response = await api.get('/departments');
+      setDepartments(response.data);
+    } catch (err) {
+      console.error('Failed to fetch departments', err);
+    }
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       fetchTeams();
+      fetchDepartments();
     }
-  }, [isOpen, fetchTeams]);
+  }, [isOpen, fetchTeams, fetchDepartments]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,9 +54,6 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
 
     try {
       const payload = { ...formData };
-      if (formData.role !== 'TECHNICIAN') {
-        delete payload.teamId;
-      }
 
       await api.post('/users', payload);
       onUserCreated();
@@ -55,6 +64,7 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
         password: '',
         role: 'GENERAL',
         teamId: '',
+        departmentId: '',
         avatar: '',
       });
     } catch (err) {
@@ -151,25 +161,39 @@ const CreateUserModal = ({ isOpen, onClose, onUserCreated }) => {
                   </select>
                 </div>
 
-                {formData.role === 'TECHNICIAN' && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700">Team</label>
-                    <select
-                      name="teamId"
-                      required
-                      value={formData.teamId}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
-                    >
-                      <option value="">Select Team</option>
-                      {teams.map((team) => (
-                        <option key={team.id} value={team.id}>
-                          {team.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Team (Optional)</label>
+                  <select
+                    name="teamId"
+                    value={formData.teamId}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                  >
+                    <option value="">Select Team</option>
+                    {teams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Department (Optional)</label>
+                  <select
+                    name="departmentId"
+                    value={formData.departmentId}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                  >
+                    <option value="">Select Department</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <div className="space-y-1 md:col-span-2">
                   <label className="text-sm font-medium text-gray-700">Avatar URL (Optional)</label>
