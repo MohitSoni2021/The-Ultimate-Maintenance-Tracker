@@ -204,7 +204,11 @@ export const updateRequest = async (req: Request, res: Response) => {
 
     const request = await prisma.maintenanceRequest.findUnique({
       where: { id },
-      select: { teamId: true },
+      include: {
+        equipment: {
+          select: { department: true },
+        },
+      },
     });
 
     if (!request) {
@@ -216,16 +220,46 @@ export const updateRequest = async (req: Request, res: Response) => {
       select: { teamId: true, role: true },
     });
 
-    if (user?.role === 'TECHNICIAN' && user?.teamId !== request.teamId) {
-      return res.status(403).json({ error: 'Access denied' });
+    // Check authorization: ADMIN can access all, MANAGER/TECHNICIAN can only access their team's requests
+    if (user?.role !== 'ADMIN') {
+      if (!user?.teamId || user.teamId !== request.teamId) {
+        return res.status(403).json({ error: 'Access denied' });
+      }
     }
 
     const updateData: any = {};
     if (stage) updateData.stage = stage;
-    if (assignedToId) updateData.assignedToId = assignedToId;
+    if (assignedToId !== undefined) {
+      // Validate that the assigned user exists and is in the same team and department
+      if (assignedToId) {
+        const assignedUser = await prisma.user.findUnique({
+          where: { id: assignedToId },
+          include: {
+            department: {
+              select: { name: true },
+            },
+          },
+        });
+
+        if (!assignedUser) {
+          return res.status(404).json({ error: 'Assigned user not found' });
+        }
+
+        // Ensure the assigned user is in the same team as the request
+        if (assignedUser.teamId !== request.teamId) {
+          return res.status(400).json({ error: 'User is not part of this team' });
+        }
+
+        // Ensure the assigned user is in the same department as the equipment
+        if (assignedUser.department?.name !== request.equipment?.department) {
+          return res.status(400).json({ error: 'User is not in the same department as the equipment' });
+        }
+      }
+      updateData.assignedToId = assignedToId;
+    }
     if (description !== undefined) updateData.description = description;
     if (duration !== undefined) updateData.duration = duration;
-    if (scheduledDate) updateData.scheduledDate = new Date(scheduledDate);
+    if (scheduledDate !== undefined) updateData.scheduledDate = scheduledDate ? new Date(scheduledDate) : null;
     if (priority) updateData.priority = priority;
     
     if (stage === 'REPAIRED' || stage === 'SCRAP' || stage === 'COMPLETED') {
