@@ -72,7 +72,7 @@ const Sidebar = ({ activeTab, onTabChange }) => {
         </p>
       </div>
 
-      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+      <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto scrollbar-hidden">
         {currentMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
