@@ -1,18 +1,49 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getTeamRequests } from '../store/requestSlice';
+import api from '../api/axios';
+import { toast } from 'react-hot-toast';
 
 const CalendarView = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { list: requests } = useSelector((state) => state.requests);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     if (user?.role === 'TECHNICIAN') {
       dispatch(getTeamRequests());
     }
+    
+    // Fetch stats for all users
+    fetchStats();
   }, [dispatch, user?.role]);
+
+  const fetchStats = async () => {
+    try {
+      setStatsLoading(true);
+      const response = await api.get('/admin/stats');
+      setStats(response.data);
+    } catch (error) {
+      // If not admin, fetch team stats instead
+      try {
+        const response = await api.get('/requests/team/requests');
+        const teamRequests = response.data;
+        setStats({
+          totalUsers: 0,
+          totalTeams: 0,
+          totalEquipment: 0,
+          totalRequests: teamRequests.length,
+        });
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+      }
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   const scheduledRequests = React.useMemo(() => {
     const scheduled = {};
@@ -89,6 +120,16 @@ const CalendarView = () => {
 
   return (
     <div className="space-y-6">
+      {/* Stats Overview */}
+      {!statsLoading && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <StatCard label="Total Users" value={stats?.totalUsers ?? '--'} color="bg-blue-50" textColor="text-blue-600" />
+          <StatCard label="Teams" value={stats?.totalTeams ?? '--'} color="bg-purple-50" textColor="text-purple-600" />
+          <StatCard label="Equipment" value={stats?.totalEquipment ?? '--'} color="bg-green-50" textColor="text-green-600" />
+          <StatCard label="Requests" value={stats?.totalRequests ?? '--'} color="bg-orange-50" textColor="text-orange-600" />
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-lg font-semibold text-gray-900">Calendar View</h3>
@@ -197,5 +238,12 @@ const CalendarView = () => {
     </div>
   );
 };
+
+const StatCard = ({ label, value, color, textColor }) => (
+  <div className={`${color} rounded-lg shadow-sm border border-gray-200 p-6`}>
+    <p className="text-sm text-gray-600 font-medium">{label}</p>
+    <p className={`text-3xl font-bold ${textColor} mt-2`}>{value}</p>
+  </div>
+);
 
 export default CalendarView;
