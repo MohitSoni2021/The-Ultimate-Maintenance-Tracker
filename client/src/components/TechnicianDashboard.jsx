@@ -67,10 +67,20 @@ const TechnicianDashboard = () => {
     return new Date(r.scheduledDate) < new Date();
   });
 
-  // Filter requests for technician: show unassigned tasks and tasks assigned to this user only
-  const technicianRequests = requests.filter((r) => 
-    !r.assignedToId || r.assignedToId === user?.id
-  );
+  // Filter requests for technician: show unassigned tasks matching their department and tasks assigned to this user only
+  const technicianRequests = requests.filter((r) => {
+    // Show tasks already assigned to this user
+    if (r.assignedToId === user?.id) {
+      return true;
+    }
+    
+    // Show unassigned tasks only if equipment category matches user's department
+    if (!r.assignedToId && r.equipment?.category === user?.department?.name) {
+      return true;
+    }
+    
+    return false;
+  });
 
   if (loading && requests.length === 0) {
     return (
