@@ -306,6 +306,58 @@ export const updateRequest = async (req: Request, res: Response) => {
   }
 };
 
+export const getAllRequests = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    // Only ADMIN and MANAGER can view all requests
+    if (user.role !== 'ADMIN' && user.role !== 'MANAGER') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const requests = await prisma.maintenanceRequest.findMany({
+      include: {
+        equipment: true,
+        assignedTo: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        team: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    res.json(requests);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const getStats = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;

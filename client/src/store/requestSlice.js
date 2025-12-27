@@ -37,6 +37,18 @@ export const getTeamRequests = createAsyncThunk(
   }
 );
 
+export const getAllRequests = createAsyncThunk(
+  'requests/getAllRequests',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/requests/all');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response.data);
+    }
+  }
+);
+
 export const getRequestById = createAsyncThunk(
   'requests/getById',
   async (id, { rejectWithValue }) => {
@@ -117,6 +129,18 @@ const requestSlice = createSlice({
       .addCase(getTeamRequests.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.error || 'Failed to fetch team requests';
+      })
+      .addCase(getAllRequests.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllRequests.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload;
+      })
+      .addCase(getAllRequests.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.error || 'Failed to fetch all requests';
       })
       .addCase(getRequestById.pending, (state) => {
         state.loading = true;

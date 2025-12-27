@@ -11,7 +11,7 @@ import TechnicianDashboardComponent from '../components/TechnicianDashboard';
 import NewAdminDashboard from '../components/AdminDashboard';
 import KanbanBoard from '../components/KanbanBoard';
 import ManagerAnalytics from '../components/ManagerAnalytics';
-import { getTeamRequests } from '../store/requestSlice';
+import { getTeamRequests, getAllRequests } from '../store/requestSlice';
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 import AdminTeamsManagement from '../components/AdminTeamsManagement';
@@ -192,8 +192,10 @@ export const ManagerDashboard = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getTeamRequests());
-  }, [dispatch]);
+    if (activeTab === 'kanban') {
+      dispatch(getAllRequests());
+    }
+  }, [dispatch, activeTab]);
 
   const renderContent = () => {
     switch (activeTab) {
