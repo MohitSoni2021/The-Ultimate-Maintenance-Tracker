@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import api from '../api/axios';
+import { toast } from 'react-hot-toast';
 import UsersManagement from './UsersManagement';
 import CreateRequestForm from '../components/CreateRequestForm';
 import MyRequestsList from '../components/MyRequestsList';
@@ -190,12 +192,29 @@ export const ManagerDashboard = () => {
   const { user } = useSelector((state) => state.auth);
   const { list: requests, loading } = useSelector((state) => state.requests);
   const dispatch = useDispatch();
+  const [stats, setStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     if (activeTab === 'kanban') {
       dispatch(getAllRequests());
     }
+    
+    // Always fetch stats for dashboard
+    fetchStats();
   }, [dispatch, activeTab]);
+
+  const fetchStats = async () => {
+    try {
+      setStatsLoading(true);
+      const response = await api.get('/requests/stats');
+      setStats(response.data);
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -206,6 +225,17 @@ export const ManagerDashboard = () => {
               <h3 className="text-2xl font-bold mb-2">Manager Dashboard Overview</h3>
               <p className="text-blue-100">Welcome back, {user?.name}. You are overseeing maintenance activities.</p>
             </div>
+            
+            {/* Stats Overview */}
+            {!statsLoading && stats && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <StatCard label="Total Requests" value={stats.total ?? '--'} color="bg-indigo-50" textColor="text-indigo-600" />
+                {stats.byStage?.map((s) => (
+                  <StatCard key={s.name} label={s.name} value={s.count ?? '--'} color="bg-gray-50" textColor="text-gray-700" />
+                ))}
+              </div>
+            )}
+            
             <ManagerAnalytics />
           </div>
         );
@@ -272,3 +302,10 @@ export const ManagerDashboard = () => {
 };
 
 export const AdminDashboard = () => <NewAdminDashboard />;
+
+const StatCard = ({ label, value, color, textColor }) => (
+  <div className={`${color} rounded-lg shadow-sm border border-gray-200 p-6`}>
+    <p className="text-sm text-gray-600 font-medium">{label}</p>
+    <p className={`text-3xl font-bold ${textColor} mt-2`}>{value}</p>
+  </div>
+);
