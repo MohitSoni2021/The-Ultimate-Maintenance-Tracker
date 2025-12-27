@@ -214,10 +214,12 @@ export const ManagerDashboard = () => {
   const fetchStats = useCallback(async () => {
     try {
       setStatsLoading(true);
+      // For managers, fetch team-specific stats
       const response = await api.get('/requests/stats');
       setStats(response.data);
     } catch (error) {
       console.error('Failed to fetch stats:', error);
+      setStats(null);
     } finally {
       setStatsLoading(false);
     }
@@ -246,10 +248,56 @@ export const ManagerDashboard = () => {
             
             {/* Stats Overview */}
             {!statsLoading && stats && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {stats.byStage?.map((s) => (
-                  <StatCard key={s.name} label={s.name} value={s.count ?? '--'} color="bg-gray-50" textColor="text-gray-700" />
-                ))}
+              <div className="space-y-6">
+                {/* Key Metrics */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {stats?.byStage?.find(s => s.name === 'OPEN') && (
+                    <StatCard 
+                      label="Pending (Unassigned)" 
+                      value={stats.byStage.find(s => s.name === 'OPEN')?.count ?? 0} 
+                      color="bg-orange-50" 
+                      textColor="text-orange-600" 
+                    />
+                  )}
+                  {stats?.byStage?.find(s => s.name === 'IN_PROGRESS') && (
+                    <StatCard 
+                      label="In Progress" 
+                      value={stats.byStage.find(s => s.name === 'IN_PROGRESS')?.count ?? 0} 
+                      color="bg-purple-50" 
+                      textColor="text-purple-600" 
+                    />
+                  )}
+                </div>
+
+                {/* Status Breakdown */}
+                {stats?.byStage && stats.byStage.length > 0 && (
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Request Status</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                      {stats.byStage.map((s) => (
+                        <div key={s.name} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <p className="text-sm text-gray-600 font-medium mb-2">{s.name}</p>
+                          <p className="text-3xl font-bold text-gray-900">{s.count}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Equipment Categories */}
+                {stats?.byCategory && stats.byCategory.length > 0 && (
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Equipment Categories</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {stats.byCategory.map((c) => (
+                        <div key={c.name} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <p className="text-sm text-gray-600 font-medium mb-2">{c.name}</p>
+                          <p className="text-3xl font-bold text-gray-900">{c.count}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             
