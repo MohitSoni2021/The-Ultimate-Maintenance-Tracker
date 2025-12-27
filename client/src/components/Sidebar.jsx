@@ -37,12 +37,14 @@ const Sidebar = ({ activeTab, onTabChange }) => {
     ],
     TECHNICIAN: [
       { id: 'kanban', label: 'Kanban', icon: LayoutGrid },
+      { id: 'my-requests', label: 'My Requests', icon: List },
       { id: 'calendar', label: 'Calendar', icon: Calendar },
       { id: 'profile', label: 'Profile', icon: User },
     ],
     MANAGER: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid },
       { id: 'kanban', label: 'Kanban', icon: LayoutGrid },
+      { id: 'my-requests', label: 'My Requests', icon: List },
       { id: 'calendar', label: 'Calendar', icon: Calendar },
       { id: 'equipment', label: 'Equipment', icon: Wrench },
       { id: 'teams', label: 'Teams', icon: Wrench },
