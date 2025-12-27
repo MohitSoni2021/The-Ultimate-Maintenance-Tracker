@@ -74,6 +74,11 @@ const RequestCard = ({ request, onClick }) => {
       <div className="mt-2 flex items-center gap-2">
         <TypeBadge type={request.type} />
         {isOverdue && <Zap size={14} className="text-red-500" />}
+        {!request.assignedTo && (
+          <span className="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">
+            Available
+          </span>
+        )}
       </div>
 
       {request.assignedTo && (
